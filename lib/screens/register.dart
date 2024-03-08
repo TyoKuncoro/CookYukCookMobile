@@ -1,115 +1,257 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cook_yuk_cook/screens/authPage.dart';
+import 'package:cook_yuk_cook/screens/login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const Login());
+void main() => runApp(const Register());
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Register extends StatefulWidget {
+  const Register({super.key});
+
   @override
-  State<Login> createState() => _LoginState();
+  State<Register> createState() => _RegisterState();
 }
 
-class _LoginState extends State<Login> {
-  final GlobalKey<FormState> _key = GlobalKey<FormState>();
-  Map<String, String> formField = <String, String>{};
-  callback() {
-    if (_key.currentState?.validate() ?? false) {
-      _key.currentState?.save();
-      formField.forEach(
-        (label, value) => print('$label = $value'),
+class _RegisterState extends State<Register> {
+  // TextEditingController untuk input email dan password
+  final nameController = TextEditingController();
+  final phoneNumberController = TextEditingController();
+  final addressController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final kpasswordController = TextEditingController();
+
+  bool obscureText = true;
+  bool _obscureText = true;
+
+  Future signUserUp() async {
+    // showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return const Center(
+    //         child: CircularProgressIndicator(),
+    //       );
+    //     });
+    // try to sign un
+    if (passwordController.text != kpasswordController.text) {
+      showErrorMessage('Password dan Konfirmasi Password tidak sama');
+    } else {
+      print('goes to else condition');
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
+      addUserDetails(
+          nameController.text.trim(),
+          phoneNumberController.text.trim(),
+          addressController.text.trim(),
+          emailController.text.trim());
     }
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const AuthPage()));
+
+    // Navigator.pop(context);
+  }
+
+  Future addUserDetails(
+    String nama,
+    String phoneNumber,
+    String address,
+    String email,
+  ) async {
+    await FirebaseFirestore.instance.collection('users').add({
+      'nama': nama,
+      'phoneNumber': phoneNumber,
+      'address': address,
+      'email': email
+    });
+  }
+
+  void showErrorMessage(String message) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        });
+  }
+
+  @override
+  void dispose() {
+    // Membersihkan TextEditingController ketika widget dihapus
+    emailController.dispose();
+    passwordController.dispose();
+    phoneNumberController.dispose();
+    addressController.dispose();
+    kpasswordController.dispose();
+    nameController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
-      ),
+          title: Text('Daftar Cook Yuk Cook'),
+          automaticallyImplyLeading: false),
       body: SingleChildScrollView(
-        child: Form(
-          key: _key,
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                "assets/images/cyc.png",
+              Image.asset("assets/images/cyc.png"),
+              SizedBox(height: 20),
+              // Input email
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Nama',
+                  border: OutlineInputBorder(),
+                ),
               ),
-              textField('E-mail', false, validateEmail),
-              textField('Password', true, validatePassword),
-              Button(text: 'Login', callback: callback),
+              SizedBox(height: 10.0),
+              TextField(
+                controller: phoneNumberController,
+                decoration: InputDecoration(
+                  labelText: 'Nomor Telepon',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              TextField(
+                controller: addressController,
+                decoration: InputDecoration(
+                  labelText: 'Alamat',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              // Input password
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                        obscureText ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () {
+                      setState(() {
+                        // Ubah status obscureText saat tombol ditekan
+                        obscureText = !obscureText;
+                      });
+                    },
+                  ),
+                ),
+                obscureText:
+                    obscureText, // Sembunyikan teks password secara default
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              TextField(
+                controller: kpasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Konfirmasi Password',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () {
+                      setState(() {
+                        // Ubah status obscureText saat tombol ditekan
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
+                ),
+                obscureText:
+                    _obscureText, // Sembunyikan teks password secara default
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Sudah punya akun? '),
+                  GestureDetector(
+                      child: const Text(
+                        'Masuk disini',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                        );
+                      }),
+                ],
+              ),
+              SizedBox(height: 15.0),
+              // Tombol login
+              ElevatedButton(
+                onPressed: () {
+                  // Aksi saat tombol login ditekan
+                  // Validasi email dan password
+                  if (emailController.text.isNotEmpty &&
+                      passwordController.text.isNotEmpty &&
+                      nameController.text.isNotEmpty &&
+                      phoneNumberController.text.isNotEmpty &&
+                      addressController.text.isNotEmpty &&
+                      kpasswordController.text.isNotEmpty) {
+                    // Lakukan penanganan register di sini
+                    signUserUp();
+                  } else {
+                    // Tampilkan pesan jika input kosong
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('Error'),
+                          content: Text('Data diatas harus diisi semua.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Text('Daftar'),
+              ),
             ],
           ),
         ),
       ),
-    ));
-  }
-
-  Widget textField(String label, bool obscure, Function validation) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: TextFormField(
-          decoration: InputDecoration(
-            labelText: label,
-            border: OutlineInputBorder(),
-          ),
-          obscureText: obscure,
-          validator: (String? value) {
-            return validation(value);
-          },
-          onSaved: (String? val) {
-            if (val != null) {
-              formField[label] = val;
-            }
-          }
-          //  => formField[label] = val,
-          ),
     );
   }
-}
-
-class Button extends StatelessWidget {
-  final String text;
-  final Function callback;
-  const Button({super.key, required this.text, required this.callback});
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-        onPressed: () {
-          callback();
-        },
-        child: const Text('Login'));
-  }
-}
-
-String? validateEmail(formText) {
-  if (formText.isEmpty) {
-    return 'E-mail tidak boleh kosong';
-  }
-  String pattern = r'\w+@\w+\.\w+';
-  RegExp regex = RegExp(pattern);
-  if (!regex.hasMatch(formText)) {
-    return 'Format E-mail salah';
-  }
-  return null;
-}
-
-String? validatePassword(formPassword) {
-  if (formPassword.isEmpty) {
-    return 'Password tidak boleh kosong';
-  }
-  String pattern =
-      r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
-  RegExp regex = RegExp(pattern);
-  if (!regex.hasMatch(formPassword)) {
-    return 'Password harus memuat huruf besar, kecil, simbol dan 8 karakter';
-  }
-  return null;
-}
-
-String? validateText(formText) {
-  if (formText.isEmpty) {
-    return 'Input tidak boleh kosong!';
-  }
-  return null;
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Loop extends StatefulWidget {
@@ -9,16 +10,25 @@ class Loop extends StatefulWidget {
 
 class _LoopState extends State<Loop> {
   final List<String> daftarNama1 = [
-    'Mas Haikal',
-    'Mas Erlangga',
-    'Tyo Peattrn Kuncoro',
+    'Tomyam',
+    'Soto rawon',
+    'Telur dadar',
   ];
+
+  final user = FirebaseAuth.instance.currentUser!;
+
+  //sign user out method
+  signUserOut() async {
+    FirebaseAuth.instance.signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:
-      ListView.builder(
+      appBar: AppBar(actions: [
+        IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
+      ]),
+      body: ListView.builder(
         itemCount: daftarNama1.length,
         itemBuilder: (context, index) {
           return ListTile(
@@ -37,7 +47,6 @@ class _LoopState extends State<Loop> {
           );
         },
       ),
-      
     );
   }
 }

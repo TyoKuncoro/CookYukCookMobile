@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "103428909949",
+    "project_id": "cook-yuk-cook",
+    "storage_bucket": "cook-yuk-cook.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103428909949:android:b72da6a67a8d49fb73ba14",
+        "android_client_info": {
+          "package_name": "com.example.cook_yuk_cook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdEmSB65GNDViRZwjUtPwj1LmrZQMUplI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
